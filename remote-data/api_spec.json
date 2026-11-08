@@ -1,0 +1,326 @@
+{
+  "$comment": "远程数据服务接口清单（机器可读）。来源：对 http://1jk412ww3207.vicp.fun:16761 的实测枚举（约 2.3 万个 控制器×动作×方法 组合）。详见 REMOTE_ACCESS_SPEC.md",
+  "service": {
+    "base_url": "http://1jk412ww3207.vicp.fun:16761",
+    "server": "Kestrel (.NET)",
+    "internal_port_hint": "8031 (JWT iss/aud = http://localhost:8031/)",
+    "auth_scheme": "JWT HS256, Authorization: Bearer <token>, ttl_days=3",
+    "token_claims": {
+      "nbf": "int",
+      "exp": "int (nbf + 259200)",
+      "AuthInfo": "JSON 字符串: {UserId, LoginRecordId, TenantId, ExpireDays, Type, CurrentToken, Param, IsSuperAdmin}",
+      "iss": "http://localhost:8031/",
+      "aud": "http://localhost:8031/"
+    }
+  },
+  "endpoints": [
+    {
+      "id": "login",
+      "method": "POST",
+      "path": "/api/Login/Login",
+      "auth": false,
+      "request": {
+        "content_type": "application/json;charset=UTF-8",
+        "body": {
+          "UserName": "string",
+          "Password": "md5(明文) 小写 hex"
+        }
+      },
+      "response": {
+        "State": "int (0=成功)",
+        "Message": "string",
+        "Data": {
+          "Token": "string",
+          "UserName": "string",
+          "RealName": "string",
+          "AuthCodes": [
+            "string"
+          ]
+        }
+      },
+      "errors": {
+        "415": "缺少 JSON Content-Type",
+        "200+State!=0": "账号/密码错误"
+      }
+    },
+    {
+      "id": "resource_page",
+      "method": "POST",
+      "path": "/api/cim/CIMScene/GetCIMSceneResourceByPage",
+      "auth": true,
+      "request": {
+        "content_type": "application/json;charset=UTF-8",
+        "body": {
+          "BigResourceType": "int[] (空数组=不限)",
+          "DataSetIds": "string[] (空数组=不限)",
+          "Type": "int (0=全部)",
+          "Label": "string (模糊)",
+          "StartTime": "string|null",
+          "EndTime": "string|null",
+          "PageIndex": "int (从 1 开始)",
+          "PageSize": "int (实测 100 可用)"
+        }
+      },
+      "response": {
+        "Total": "int",
+        "Rows": [
+          "resource(42 字段)"
+        ]
+      },
+      "notes": [
+        "唯一能取到 MetaData / OriginalRootFileId 的接口",
+        "MetaData 是 JSON 字符串，需二次解析",
+        "不含任何文件清单"
+      ]
+    },
+    {
+      "id": "file_stream",
+      "method": "GET",
+      "path": "/api/DownLoad/GetFileStream?{fastdfs_key}",
+      "auth": false,
+      "request": {
+        "query": "整个查询串即文件键，无参数名，例如 ?group1/M00/47/D3/wKgCAmpUQFaAdY2KAD0BIOQ3DkU131.jpg",
+        "headers": {
+          "Accept-Encoding": "identity"
+        }
+      },
+      "response": {
+        "200": "文件原始字节（无 Content-Disposition）",
+        "204": "键不存在 / 偶发瞬时失败（重试即恢复）",
+        "405": "用 POST 调用"
+      },
+      "notes": [
+        "不支持参数名形式（?key=/?path= 均 204）",
+        "不支持相对路径、目录、resourceId 组合",
+        "实测吞吐约 4 MB/s，与并发无关",
+        "客户端应校验首字节：JPEG FFD8FF / PNG 89504E47 / SQLite 'SQLite format 3\\0' / JSON '{'",
+        "2026-11-02 从前端匿名文件加载复核：可不带令牌读取"
+      ]
+    },
+    {
+      "id": "arlayer_count",
+      "method": "GET",
+      "path": "/api/ARLayer/GetNumARNote/{resource_id}",
+      "auth": false,
+      "response": {"200": "该倾斜影像资源的图片数量"}
+    },
+    {
+      "id": "arlayer_page",
+      "method": "GET",
+      "path": "/api/ARLayer/FetchARNote?arlayerUrl={resource_id}&startPos={offset}&num={limit}",
+      "auth": false,
+      "response": {"200": "图片、相机位姿和 FastDFS 键的原始记录数组"}
+    },
+    {
+      "id": "arlayer_image",
+      "method": "GET",
+      "path": "/api/ARLayer/GetImageFileByImageId/{image_id}",
+      "auth": false,
+      "response": {"200": "原始 JPEG 字节", "204": "文件缺失"}
+    },
+    {
+      "id": "terrain_file",
+      "method": "GET",
+      "path": "/api/Mesh/GetMesh3DTilesFile/{resource_id}/{relative_path}",
+      "auth": false,
+      "response": {"200": "地形 3D Tiles 根 JSON、子 JSON 或 GLB 原始字节；某些不存在的路径也可能是空内容"}
+    },
+    {
+      "id": "pointcloud_file",
+      "method": "GET",
+      "path": "/api/PointCload/GetPointCloud3DTilesFile/{resource_id}/{relative_path}",
+      "auth": false,
+      "response": {"200": "点云 3D Tiles 根 JSON、子 JSON 或 GLB 原始字节"},
+      "notes": ["前端 SDK 的控制器名确实拼作 PointCload", "相同根 JSON 的不同资源可能有不同 GLB 字节"]
+    },
+    {
+      "id": "raster_tms_file",
+      "method": "GET",
+      "path": "/api/Raster/GetTmsFile/{resource_id}/{relative_path}",
+      "auth": false,
+      "response": {"200": "tilemapresource.xml 或 PNG 原始字节；无效瓦片可能为 200 空内容"}
+    },
+    {
+      "id": "video_direction_initial",
+      "method": "GET",
+      "path": "/api/Video/GetInitDirectionalInfoList/{resource_id}",
+      "auth": false,
+      "response": {"200": "方向视频初始化信息，含 MP4 FastDFS FileId"},
+      "notes": ["MP4 文件流在实测中 90 秒无响应"]
+    },
+    {
+      "id": "resource_lite_page",
+      "method": "POST",
+      "path": "/api/Resource/GetByPage",
+      "auth": true,
+      "request": {
+        "body": {
+          "PageIndex": "int",
+          "PageSize": "int"
+        }
+      },
+      "response": {
+        "Total": "114（仅覆盖 5 类资源，非全量）",
+        "Rows": [
+          {
+            "Id": "string",
+            "Label": "string",
+            "Description": "string",
+            "Type": "int",
+            "TypeName": "string",
+            "UploadTime": "string",
+            "MetaData": "null",
+            "BusinessTag": "string",
+            "EpsgId": "int",
+            "TypeKey": "string (如 RasterTMS)",
+            "Url": "null",
+            "Attribute": "null",
+            "IsLook": "bool",
+            "IsSetting": "bool",
+            "Proj4text": "null"
+          }
+        ]
+      }
+    },
+    {
+      "id": "user_page",
+      "method": "POST",
+      "path": "/api/User/GetByPage",
+      "auth": true,
+      "response": {
+        "Total": "int (实测 0)",
+        "Rows": "null"
+      },
+      "notes": "与数据无关"
+    },
+    {
+      "id": "role_page",
+      "method": "POST",
+      "path": "/api/Role/GetByPage",
+      "auth": true,
+      "notes": "与数据无关"
+    },
+    {
+      "id": "org_page",
+      "method": "POST",
+      "path": "/api/Organization/GetByPage",
+      "auth": true,
+      "notes": "与数据无关"
+    },
+    {
+      "id": "layer_file",
+      "method": "GET",
+      "path": "/api/Layer/GetFile",
+      "auth": true,
+      "response": {
+        "200": "空 body（任何参数都是 0 字节）"
+      },
+      "notes": "存在但不可用"
+    }
+  ],
+  "absent_endpoints": {
+    "note": "以下类别的路径全部 404（已系统枚举 130+ 控制器根 × 200+ 动作名）",
+    "patterns": [
+      "/api/DownLoad/{GetFileList,GetResourceFileList,GetResourceFiles,GetFileTree,DownloadResource,Export,...}",
+      "/api/cim/CIMScene/{GetCIMSceneResourceById,GetCIMSceneResourceFileList,GetTile,GetTileset,GetFileStream,...}",
+      "/api/{File,Photo,Model,Tiles,Tile,DataSet,Storage,FastDFS,DownloadCenter,TileService,Package}/*"
+    ]
+  },
+  "resource_types": [
+    {
+      "type": 4000001,
+      "name": "航空倾斜",
+      "big_type": 4,
+      "count": 8,
+      "retrievable": "full",
+      "root_file_ext": "db3",
+      "file_count": 23554,
+      "bytes": 109696512614
+    },
+    {
+      "type": 1000012,
+      "name": "地形3dtiles",
+      "big_type": 1,
+      "count": 13,
+      "retrievable": "partial",
+      "root_file_ext": "json",
+      "file_count": 3268,
+      "bytes": 107486891616
+    },
+    {
+      "type": 13000006,
+      "name": "点云3dtiles",
+      "big_type": 13,
+      "count": 10,
+      "retrievable": "partial",
+      "root_file_ext": "json",
+      "file_count": 1740,
+      "bytes": 76832227576
+    },
+    {
+      "type": 12000008,
+      "name": "Raster TMS切片",
+      "big_type": 12,
+      "count": 22,
+      "type_key": "RasterTMS",
+      "retrievable": "partial",
+      "file_count": 2064,
+      "bytes": 3471802095
+    },
+    {
+      "type": 10000004,
+      "name": "定向动态视频",
+      "big_type": 10,
+      "count": 5,
+      "retrievable": "partial",
+      "file_count": 20,
+      "bytes": 9156727875
+    },
+    {
+      "type": 12000004,
+      "name": "栅格数据WMS服务",
+      "big_type": 12,
+      "count": 236,
+      "retrievable": "service",
+      "file_count": 0
+    },
+    {
+      "type": 12000005,
+      "name": "栅格数据WMTS服务",
+      "big_type": 12,
+      "count": 51,
+      "retrievable": "service",
+      "file_count": 0
+    },
+    {
+      "type": 2000004,
+      "name": "wfs",
+      "big_type": 2,
+      "count": 25,
+      "retrievable": "service",
+      "file_count": 0
+    }
+  ],
+  "storage": {
+    "scheme": "FastDFS",
+    "key_format": "group1/M00/<2 位>/<2 位>/wKgCA<base64(时间戳+大小+CRC+随机)>.<ext>",
+    "enumerable": false,
+    "real_share": "\\\\192.168.2.2\\image\\group1\\... （UNC；去掉前两段即 FastDFS 键）",
+    "index_files": {
+      "航空倾斜": "SQLite DB3（Photo/PhotoGroup 等 9 张表）",
+      "地形/点云3dtiles": "tileset.json（content.uri 为相对路径，无映射表）",
+      "定向视频": "MetaData.videoInfos[].FirstSnapshotFileId（仅快照）"
+    }
+  },
+  "quirks": [
+    "文件键必须放在 ? 之后且不带参数名",
+    "204 偶发（约 1/60），需重试 3~4 次",
+    "POST 必须带 Content-Type: application/json，否则 415",
+    "业务错误以 HTTP 200 + State!=0 表达",
+    "Token 3 天有效，ExpireDays=3",
+    "PageSize=0 时 Total 正常但 Rows 为空",
+    "Range 字段是相机中心 XY 外接矩形，不是地面覆盖",
+    "EpsgId 字段不可信（ENU 资源也写 4326），以空三 XML 的 SRS 为准",
+    "网关（花生壳）拦截时返回 HTTP 200 + 10974 字节 HTML 页，需按 Content-Type/首字节甄别"
+  ]
+}

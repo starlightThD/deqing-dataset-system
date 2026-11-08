@@ -1,0 +1,14 @@
+{
+  "schema": "deqing.data-package.v1",
+  "type": "video",
+  "name": "定向视频资料组",
+  "description": "替换为采集和标定说明",
+  "location_review": {
+    "confirmed": true,
+    "source_crs": "EPSG:4549",
+    "axis_order": "easting,northing,height",
+    "method": "核对精标定相机中心转换及正射 GeoTIFF 产品覆盖范围",
+    "evidence": "填写相机参数说明、GeoTIFF CRS 和范围核验记录"
+  },
+  "metadata": {}
+}

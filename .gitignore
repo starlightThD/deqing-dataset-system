@@ -1,0 +1,43 @@
+# Python and local tooling
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+.coverage*
+htmlcov/
+build/
+dist/
+
+# Service state and database backups
+.data/
+private/
+*.sqlite3*
+*.db
+*.db-*
+*.dump
+*.log
+backups/
+
+# Credentials and machine-specific configuration
+.env
+.env.*
+!.env.example
+credentials.json
+deqing-credentials.json
+legacy_auth.json
+postgis_dsn
+*.pem
+*.p12
+*.key
+*.token
+remote-data/.token
+
+# Captured remote datasets and generated archives
+remote-data/out/
+remote-data/resources.json
+remote-data/gs_wms.xml
+remote-data/gs_wfs.xml
+deliverables/

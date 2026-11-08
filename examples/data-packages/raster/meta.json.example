@@ -1,0 +1,13 @@
+{
+  "name": "影像期次名称",
+  "scheme": "tms",
+  "crs": "EPSG:3857",
+  "tileSize": 256,
+  "minzoom": 8,
+  "maxzoom": 18,
+  "bounds": [119.80, 30.30, 120.10, 30.60],
+  "tiles": ["{z}/{x}/{y}.png"],
+  "sourceFormat": "GeoTIFF",
+  "contentType": "satellite-imagery",
+  "boundaryProcessing": "裁切 / 未裁切说明"
+}

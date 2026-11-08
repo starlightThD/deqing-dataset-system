@@ -1,0 +1,19 @@
+{
+  "schema": "deqing.data-package.v1",
+  "type": "vector",
+  "name": "生态修复边界",
+  "description": "替换为数据来源与处理说明",
+  "location_review": {
+    "confirmed": true,
+    "source_crs": "EPSG:4549",
+    "axis_order": "easting,northing",
+    "method": "按 PRJ/EPSG 转换并在 GIS 中核对 WGS84 几何",
+    "evidence": "填写坐标系文件及独立 GIS 核验记录"
+  },
+  "metadata": {
+    "source_srid": 4549,
+    "encoding": "UTF-8",
+    "vertical_crs": null,
+    "vertical_unit": null
+  }
+}

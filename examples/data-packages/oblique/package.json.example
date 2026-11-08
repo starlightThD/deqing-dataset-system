@@ -1,0 +1,14 @@
+{
+  "schema": "deqing.data-package.v1",
+  "type": "oblique",
+  "name": "倾斜影像批次",
+  "description": "替换为采集和标定说明",
+  "location_review": {
+    "confirmed": true,
+    "source_crs": "EPSG:4549",
+    "axis_order": "easting,northing,height_m",
+    "method": "核对相机到世界矩阵并独立复算相机中心",
+    "evidence": "填写标定来源、坐标系说明及复算记录"
+  },
+  "metadata": {}
+}

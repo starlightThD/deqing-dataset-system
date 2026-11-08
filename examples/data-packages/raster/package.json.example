@@ -1,0 +1,14 @@
+{
+  "schema": "deqing.data-package.v1",
+  "type": "raster",
+  "name": "多期卫星影像",
+  "description": "替换为数据来源与处理说明",
+  "location_review": {
+    "confirmed": true,
+    "source_crs": "EPSG:3857",
+    "axis_order": "x,y",
+    "method": "核验 TMS 矩阵、元数据 bounds 与瓦片范围",
+    "evidence": "填写瓦片生成说明及独立 GIS 核验记录"
+  },
+  "metadata": {}
+}

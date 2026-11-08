@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>7110 数据管理终端</title>
+  <link rel="stylesheet" href="/admin/console/assets/console.css?v=resource-rename-1">
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar">
+      <a class="brand" href="/admin/console" aria-label="7110 数据管理终端首页">
+        <span class="brand-mark">D</span>
+        <span><strong>DEQING DATA</strong><small>7110 管理终端</small></span>
+      </a>
+      <div class="side-label">数据工作台</div>
+      <button class="nav-item active" data-nav="catalog"><span class="nav-icon">▦</span>资源目录 <span class="nav-count" id="nav-count">—</span></button>
+      <button class="nav-item" data-nav="loading"><span class="nav-icon">⇧</span>接入与加载</button>
+      <div class="side-divider"></div>
+      <div class="side-label">数据类型</div>
+      <div id="type-nav" class="type-nav"></div>
+      <div class="side-bottom">
+        <div class="connection"><span class="pulse"></span><span><strong>本地数据服务</strong><small>API · 7110</small></span></div>
+        <button class="logout" id="logout">退出登录</button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="crumb"><span>数据工作台</span><b>/</b><strong id="page-crumb">资源目录</strong></div>
+        <div class="top-actions"><span class="live-badge"><i></i> 服务在线</span><span class="user-chip"><span class="avatar">A</span><span id="user-name">管理员</span><em>ADMIN</em></span></div>
+      </header>
+
+      <section id="login-view" class="login-view" hidden>
+        <div class="login-card">
+          <div class="login-symbol">D</div>
+          <div class="eyebrow">DATA ADMINISTRATION</div>
+          <h1>登录数据管理终端</h1>
+          <p>使用 7110 数据服务管理员账号登录。目录管理接口仅允许管理员访问。</p>
+          <form id="login-form">
+            <label>用户名<input name="username" autocomplete="username" required value="admin"></label>
+            <label>密码<input name="password" type="password" autocomplete="current-password" required></label>
+            <div id="login-error" class="form-error" role="alert"></div>
+            <button class="primary-button" type="submit">登录终端 <span>→</span></button>
+          </form>
+          <div class="login-foot"><span class="secure-dot"></span>账户权限由 7110 服务验证</div>
+        </div>
+        <div class="login-decoration"><div class="orb orb-a"></div><div class="orb orb-b"></div><div class="login-grid"></div><div class="decoration-caption">A unified view of your geospatial data</div></div>
+      </section>
+
+      <section id="app-view" hidden>
+        <div class="page-heading">
+          <div><div class="eyebrow">DATA INVENTORY</div><h1 id="page-title">资源目录</h1><p id="page-description">查看 7110 中已登记的数据、空间范围与访问方式。</p></div>
+          <div class="heading-actions"><button class="button ghost" id="refresh">↻ <span>刷新目录</span></button><button class="button primary" id="go-loading">＋ 接入数据</button></div>
+        </div>
+
+        <div id="catalog-page">
+          <div class="stat-grid" id="stats"></div>
+          <div class="content-grid">
+            <section class="panel inventory-panel">
+              <div class="panel-head">
+                <div><h2>已登记资源</h2><p id="result-count">正在读取服务目录…</p></div>
+                <div class="head-tools"><button class="icon-button" id="view-toggle" title="切换视图">▤</button></div>
+              </div>
+              <div class="filters">
+                <label class="search-box"><span>⌕</span><input id="search" type="search" placeholder="搜索名称、ID、坐标系…"><kbd>⌘ K</kbd></label>
+                <select id="category-filter" aria-label="按类型筛选"><option value="all">所有类型</option></select>
+                <select id="extent-filter" aria-label="按范围筛选"><option value="all">全部范围状态</option><option value="yes">有空间范围</option><option value="no">缺少空间范围</option></select>
+              </div>
+              <div class="spatial-filter"><span>范围相交</span><input id="bbox-search" inputmode="decimal" placeholder="minLon, minLat, maxLon, maxLat" aria-label="输入 WGS84 经纬度范围"><button id="bbox-apply">筛选</button><button id="bbox-clear" class="plain">清除</button><small>只匹配已登记为 WGS84 的空间范围</small></div>
+              <div class="table-wrap" id="table-view">
+                <table>
+                  <thead><tr><th>资源</th><th>类型</th><th>大小</th><th>空间范围</th><th>登记时间</th><th></th></tr></thead>
+                  <tbody id="resource-rows"><tr><td colspan="6" class="empty">正在连接 7110…</td></tr></tbody>
+                </table>
+              </div>
+              <div id="card-view" class="resource-cards" hidden></div>
+              <div class="table-foot"><span id="table-summary"></span><span class="read-only-note"><i></i> 仅管理员可导入、重命名或删除；旧镜像文件只读</span></div>
+            </section>
+            <aside class="panel map-panel">
+              <div class="panel-head"><div><h2>空间分布</h2><p>仅绘制已登记为 WGS84 的范围</p></div><span class="map-tag">WGS84</span></div>
+              <div class="map-canvas" id="map-canvas">
+                <div class="map-graticule"></div><svg id="extent-map" viewBox="0 0 400 260" role="img" aria-label="资源空间范围分布图"></svg>
+                <div class="map-axis axis-top">范围示意 · 非底图</div>
+                <div id="map-empty" class="map-empty">载入具有可信 WGS84 范围的资源后显示</div>
+              </div>
+              <div class="map-legend"><span><i class="legend-square model"></i>三维</span><span><i class="legend-square imagery"></i>影像</span><span><i class="legend-square vector"></i>矢量</span><span><i class="legend-square other"></i>其他</span></div>
+              <div class="map-foot"><span>范围来自资源登记信息</span><button class="text-button" id="clear-map-filter">重置筛选条件</button></div>
+            </aside>
+          </div>
+        </div>
+
+        <div id="loading-page" hidden>
+          <div class="loading-banner"><div class="banner-icon">⇧</div><div><div class="eyebrow">INGESTION WORKSPACE</div><h2>统一的数据接入流程</h2><p>先选择格式化入口完成登记，再回到资源目录核对空间范围、资源版本和加载地址。</p></div><span class="flow-pill"><b>01</b> 入库 <i>→</i> <b>02</b> 校验 <i>→</i> <b>03</b> 加载</span></div>
+          <div class="ingest-grid" id="ingest-grid"></div>
+          <section id="upload-workspace" class="panel upload-workspace" hidden aria-live="polite"></section>
+          <div class="panel workflow-note"><div class="note-icon">i</div><div><strong>权限和数据归属继续由 7110 执行</strong><p>终端调用现有的管理员接口，不在浏览器中保存管理员密钥。普通用户仍为只读；标绘继续按用户隔离。格式支持、元数据和空间范围以对应接口的校验结果为准。</p></div></div>
+          <div class="panel loading-routes"><div class="panel-head"><div><h2>已有加载接口</h2><p>可复制给前端或智能体调用</p></div></div><div id="route-list" class="route-list"></div></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="detail-backdrop" class="detail-backdrop" hidden></div>
+  <aside id="detail-panel" class="detail-panel" aria-label="资源详情" aria-hidden="true">
+    <div class="detail-top"><div><div class="eyebrow">RESOURCE DETAILS</div><h2 id="detail-title">资源详情</h2></div><button id="close-detail" class="close-button" aria-label="关闭">×</button></div>
+    <div id="detail-content" class="detail-content"></div>
+  </aside>
+  <div id="toast" class="toast" role="status"></div>
+  <script src="/admin/console/assets/md5.min.js"></script>
+  <script src="/admin/console/assets/console.js?v=unified-poi-1"></script>
+</body>
+</html>

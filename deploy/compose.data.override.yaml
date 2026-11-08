@@ -1,0 +1,15 @@
+services:
+  data:
+    command:
+      - bash
+      - -lc
+      - exec /workspace/.venv/bin/uvicorn dataset_service.main:app --app-dir /opt/deqing-data --host 0.0.0.0 --port 7110 --workers 1
+    environment:
+      DEQING_DATA_DIR: /workspace/data
+      DEQING_SOURCE_ALIASES: '{"garden":"/imports/garden","garden_update":"/imports/garden-update"}'
+      DEQING_EXPECTED_IMAGES: "185"
+      DEQING_LEGACY_OUT: /workspace/legacy/out
+      DEQING_POSTGIS_DSN_FILE: /workspace/data/postgis_dsn
+    volumes:
+      - ${DEQING_DATA_SERVICE_SOURCE:?set project path on server}:/opt/deqing-data:ro
+      - /data1/hj/data:/imports:ro

@@ -1,0 +1,26 @@
+{
+  "schema": "deqing.data-package.v1",
+  "type": "pointcloud",
+  "name": "德清模型样例",
+  "description": "替换为数据来源与处理说明",
+  "location_review": {
+    "confirmed": true,
+    "source_crs": "EPSG:4549",
+    "axis_order": "easting,northing,height",
+    "method": "按 tileset 包围体转换为 WGS84 并独立核验",
+    "evidence": "填写 metadata.xml、tileset 和 GIS 核验记录"
+  },
+  "metadata": {
+    "format": "3dtiles",
+    "content_kind": "mesh",
+    "srs": "EPSG:4549",
+    "label": "source-2026-11",
+    "entrypoint": "tileset.json",
+    "spatial_extent": {
+      "type": "Polygon",
+      "coordinates": [[[119.90,30.40],[119.95,30.40],[119.95,30.45],[119.90,30.45],[119.90,30.40]]]
+    },
+    "resource_metadata": {},
+    "version_metadata": {}
+  }
+}

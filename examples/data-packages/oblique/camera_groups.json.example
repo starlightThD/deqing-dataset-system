@@ -1,0 +1,13 @@
+{
+  "camera_groups": [
+    {
+      "camera_group_id": "camera_group_1",
+      "image_dimensions_px": {"width": 4000, "height": 3000},
+      "intrinsics": {
+        "focal_length_px": {"fx": 2800.0, "fy": 2800.0},
+        "principal_point_px_from_upper_left": {"x": 2000.0, "y": 1500.0}
+      },
+      "distortion": {"coefficients": {"k1": 0.0, "k2": 0.0, "p1": 0.0, "p2": 0.0}}
+    }
+  ]
+}

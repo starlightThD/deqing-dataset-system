@@ -1,0 +1,8 @@
+{
+  "schema": "deqing.oblique-provenance.v1",
+  "source": "数据来源说明",
+  "calibration_source": "相机标定文件或报告",
+  "pose_source": "位姿文件或重建工程",
+  "ground_control_points_used": false,
+  "absolute_accuracy": "unknown"
+}

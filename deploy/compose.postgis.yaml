@@ -1,0 +1,27 @@
+services:
+  postgis:
+    image: postgis/postgis:16-3.5
+    container_name: deqing-postgis
+    restart: unless-stopped
+    env_file:
+      - ../private/postgis.env
+    environment:
+      POSTGRES_DB: deqing_spatial
+      POSTGRES_USER: deqing_spatial
+    volumes:
+      - deqing_postgis_data:/var/lib/postgresql/data
+    networks:
+      - deqing_default
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U deqing_spatial -d deqing_spatial"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+networks:
+  deqing_default:
+    external: true
+
+volumes:
+  deqing_postgis_data:
+    name: deqing_postgis_data
